@@ -358,7 +358,7 @@ parasite_property_cell_renderer_start_editing(GtkCellRenderer *renderer,
 
     g_value_unset(&gvalue);
 
-    g_signal_connect(G_OBJECT(editable), "editing_done",
+    g_signal_connect(G_OBJECT(editable), "editing-done",
                      G_CALLBACK(parasite_property_cell_renderer_stop_editing),
                      renderer);
 
