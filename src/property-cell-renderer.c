@@ -388,7 +388,7 @@ parasite_property_cell_renderer_stop_editing(GtkCellEditable *editable,
     {
         gboolean canceled;
 
-        g_object_get (renderer, "editing-canceled", &canceled, NULL);
+        g_object_get (editable, "editing-canceled", &canceled, NULL);
         gtk_cell_renderer_stop_editing(renderer, canceled);
 
         if (canceled)
