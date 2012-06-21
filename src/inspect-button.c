@@ -29,7 +29,12 @@ on_inspect_widget(GtkWidget *grab_window,
                   GdkEventButton *event,
                   ParasiteWindow *parasite)
 {
-    gdk_pointer_ungrab(event->time);
+    GdkDeviceManager *manager;
+    GdkDevice *device;
+
+    manager = gdk_display_get_device_manager(gdk_window_get_display(event->window));
+    device = gdk_device_manager_get_client_pointer(manager);
+    gdk_device_ungrab(device, event->time);
     gtk_widget_hide(parasite->highlight_window);
 
     if (parasite->selected_window != NULL)
@@ -104,13 +109,16 @@ on_highlight_widget(GtkWidget *grab_window,
 {
     GdkWindow *selected_window;
     gint x, y, width, height;
+    GdkDeviceManager *manager;
+    GdkDevice *device;
 
     ensure_highlight_window(parasite);
 
     gtk_widget_hide(parasite->highlight_window);
 
-    selected_window = gdk_display_get_window_at_pointer(
-        gtk_widget_get_display(grab_window), NULL, NULL);
+    manager = gdk_display_get_device_manager(gdk_window_get_display(event->window));
+    device = gdk_device_manager_get_client_pointer(manager);
+    selected_window = gdk_device_get_window_at_position(device, NULL, NULL);
 
     if (selected_window == NULL)
     {
@@ -144,6 +152,8 @@ on_inspect_button_release(GtkWidget *button,
 {
     GdkCursor *cursor;
     GdkEventMask events;
+    GdkDeviceManager *manager;
+    GdkDevice *device;
 
     events = GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK |
              GDK_POINTER_MOTION_MASK;
@@ -166,12 +176,17 @@ on_inspect_button_release(GtkWidget *button,
 
     cursor = gdk_cursor_new_for_display(gtk_widget_get_display(button),
                                         GDK_CROSSHAIR);
-    gdk_pointer_grab(gtk_widget_get_window(parasite->grab_window), FALSE,
-                     events,
-                     NULL,
-                     cursor,
-                     event->time);
-    gdk_cursor_unref(cursor);
+
+    manager = gdk_display_get_device_manager(gtk_widget_get_display(button));
+    device = gdk_device_manager_get_client_pointer(manager);
+    gdk_device_grab(device,
+                    gtk_widget_get_window(parasite->grab_window),
+                    GDK_OWNERSHIP_NONE,
+                    FALSE,
+                    events,
+                    cursor,
+                    event->time);
+    g_object_unref(cursor);
 }
 
 
